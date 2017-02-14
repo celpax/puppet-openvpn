@@ -1,15 +1,18 @@
 client
-ca keys/<%= @name %>/ca.crt
-cert keys/<%= @name %>/<%= @name %>.crt
-key keys/<%= @name %>/<%= @name %>.key
 dev <%= @dev %>
 proto <%= @proto %>
-remote <%= @remote_host %> <%= @port %>
+<% @remote_host = [@remote_host] unless @remote_host.kind_of?(Array) -%>
+<% @remote_host.each do |item| -%>
+remote <%= item %> <%= @port %>
+<% end -%>
 <% if @compression != '' -%>
 <%= @compression %>
 <% end -%>
 resolv-retry <%= @resolv_retry %>
 auth-retry <%= @auth_retry %>
+<% if @pull -%>
+pull
+<% end -%>
 <% if @nobind -%>
 nobind
 <% end -%>
@@ -21,6 +24,9 @@ persist-tun
 <% end -%>
 <% if @cipher -%>
 cipher <%= @cipher %>
+<% end -%>
+<% if @tls_cipher -%>
+tls-cipher <%= @tls_cipher %>
 <% end -%>
 <% if @mute_replay_warnings -%>
 mute-replay-warnings
@@ -52,12 +58,6 @@ up "<%= @up %>"
 <% if @down != '' -%>
 down "<%= @down %>"
 <% end -%>
-<% if @tls_auth -%>
-
-# tls authentification
-tls-client
-tls-auth keys/<%= @name %>/ta.key 1
-<% end -%>
 <% if @x509_name -%>
 
 # x509 name verification
@@ -68,3 +68,4 @@ verify-x509-name "<%= @x509_name %>" name
 <% @custom_options.each_pair do |key, value| -%>
 <%= key %> <%= value %>
 <% end -%>
+

@@ -2,6 +2,40 @@
 
 ## Next Version
 
+## 4.0.1
+
+* Fix namespecific_rclink warning for non BSD systems ([#214](https://github.com/luxflux/puppet-openvpn/pull/214))
+
+## 4.0.0
+
+* Workaround for [MODULES-2874](https://tickets.puppetlabs.com/browse/MODULES-2874) ([#201](https://github.com/luxflux/puppet-openvpn/pull/201))
+* Fix for [external CA handling with exported resources](https://github.com/luxflux/puppet-openvpn/pull/200) ([#201](https://github.com/luxflux/puppet-openvpn/pull/201))
+* Drop Support for Puppet 3.x ([#212](https://github.com/luxflux/puppet-openvpn/pull/212))
+
+## 3.1.0
+
+* Support for FreeBSD ([#180](https://github.com/luxflux/puppet-openvpn/pull/180))
+* Support for port-share ([#182](https://github.com/luxflux/puppet-openvpn/issues/182)/[#185](https://github.com/luxflux/puppet-openvpn/pull/185))
+* Support for pre-shared keys ([#186](https://github.com/luxflux/puppet-openvpn/pull/186))
+* Support LDAP anonymous binds ([#189](https://github.com/luxflux/puppet-openvpn/pull/189))
+* Fix `.ovpn` files generation ([#190](https://github.com/luxflux/puppet-openvpn/pull/190))
+* Support for external CAs ([#192](https://github.com/luxflux/puppet-openvpn/pull/192))
+* Small Typo fix ([#192](https://github.com/luxflux/puppet-openvpn/pull/193))
+* Fix support for Amazon Linux ([#194](https://github.com/luxflux/puppet-openvpn/pull/194))
+* Client `pull` option ([#195](https://github.com/luxflux/puppet-openvpn/pull/195))
+* Allow `remote_host` to be an array of servers ([#195](https://github.com/luxflux/puppet-openvpn/pull/195))
+* More robust Shared CA handling ([#191](https://github.com/luxflux/puppet-openvpn/pull/191), [#196](https://github.com/luxflux/puppet-openvpn/pull/196))
+
+## 3.0.0
+
+* Support for Ubuntu 15.04 ([#168](https://github.com/luxflux/puppet-openvpn/pull/168))
+* Support for specifying TLS-Cipher ([#169](https://github.com/luxflux/puppet-openvpn/pull/169))
+* Support for specifying custom certificate expiry ([#169](https://github.com/luxflux/puppet-openvpn/pull/169))
+* Support for README in download configs ([#169](https://github.com/luxflux/puppet-openvpn/pull/169))
+* Support for Tunnelblick configurations ([#169](https://github.com/luxflux/puppet-openvpn/pull/169))
+* Fix certificate revocation in Ubuntu Precise ([#169](https://github.com/luxflux/puppet-openvpn/pull/169))
+* Use concat for ovpn generation ([#176](https://github.com/luxflux/puppet-openvpn/pull/176))
+
 ## 2.9.0
 
 This will be the last version of version 2.x with new features.

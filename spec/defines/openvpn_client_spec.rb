@@ -35,8 +35,9 @@ describe 'openvpn::client', :type => :define do
 
   it { should contain_exec('tar the thing test_server with test_client').with(
     'cwd'     => '/etc/openvpn/test_server/download-configs/',
-    'command' => '/bin/rm test_client.tar.gz; tar --exclude=\*.conf.d -chzvf test_client.tar.gz test_client'
+    'command' => '/bin/rm test_client.tar.gz; tar --exclude=\*.conf.d -chzvf test_client.tar.gz test_client test_client.tblk'
   ) }
+
 
   context "setting the minimum parameters" do
     let(:params) { { 'server' => 'test_server' } }
@@ -62,6 +63,7 @@ describe 'openvpn::client', :type => :define do
     it { should_not contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^verify-x509-name/)}
     it { should_not contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^sndbuf/)}
     it { should_not contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^rcvbuf/)}
+    it { should_not contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^pull/)}
   end
 
   context "setting all of the parameters" do
@@ -75,9 +77,10 @@ describe 'openvpn::client', :type => :define do
       'persist_key'           => false,
       'persist_tun'           => false,
       'cipher'                => 'BF-CBC',
+      'tls_cipher'            => 'TLS-DHE-RSA-WITH-AES-256-CBC-SHA',
       'port'                  => '123',
       'proto'                 => 'udp',
-      'remote_host'           => 'somewhere',
+      'remote_host'           => ['somewhere', 'galaxy'],
       'resolv_retry'          => '2m',
       'auth_retry'            => 'interact',
       'verb'                  => '1',
@@ -87,6 +90,8 @@ describe 'openvpn::client', :type => :define do
       'x509_name'             => 'test_server',
       'sndbuf'                => 393216,
       'rcvbuf'                => 393215,
+      'readme'                => 'readme text',
+      'pull'                  => true,
     } }
     let(:facts) { {
       :fqdn => 'somehost',
@@ -103,6 +108,7 @@ describe 'openvpn::client', :type => :define do
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^dev\s+tap$/)}
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^proto\s+udp$/)}
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^remote\s+somewhere\s+123$/)}
+    it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^remote\s+galaxy\s+123$/)}
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^comp-something$/)}
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^resolv-retry\s+2m$/)}
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^verb\s+1$/)}
@@ -111,15 +117,40 @@ describe 'openvpn::client', :type => :define do
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^setenv\s+CLIENT_CERT\s+0$/)}
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^setenv_safe\s+FORWARD_COMPATIBLE\s+1$/)}
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^cipher\s+BF-CBC$/)}
+    it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^tls-cipher\s+TLS-DHE-RSA-WITH-AES-256-CBC-SHA$/)}
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^tls-client$/)}
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^verify-x509-name\s+"test_server"\s+name$/)}
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^sndbuf\s+393216$/)}
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^rcvbuf\s+393215$/)}
+    it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/README').with_content(/^readme text$/)}
+    it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^pull$/)}
+
   end
 
   context "omitting the cipher key" do
     let(:params) { { 'server' => 'test_server' } }
     it { should_not contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^cipher/) }
+  end
+
+  context "should fail if specifying an openvpn::server with extca_enabled=true" do
+    let(:params) { {
+      'server' => "test_server_extca",
+    } }
+    before do
+      pre_condition << '
+        openvpn::server { "text_server_extca":
+          tls_auth                => true,
+          extca_enabled           => true,
+          extca_ca_cert_file      => "/etc/ipa/ca.crt",
+          extca_ca_crl_file       => "/etc/ipa/ca_crl.pem",
+          extca_server_cert_file  => "/etc/pki/tls/certs/localhost.crt",
+          extca_server_key_file   => "/etc/pki/tls/private/localhost.key",
+          extca_dh_file           => "/etc/ipa/dh.pem",
+          extca_tls_auth_key_file => "/etc/openvpn/keys/ta.key",
+        }
+      '
+    end
+    it { expect { should contain_file('test') }.to raise_error(Puppet::Error) }
   end
 
   context "when using shared ca" do
@@ -150,6 +181,7 @@ describe 'openvpn::client', :type => :define do
       )}
     end
 
+
     # Check that certificate files point to the provided CA
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^client$/)}
     it { should contain_file('/etc/openvpn/test_server/download-configs/test_client/test_client.conf').with_content(/^ca\s+keys\/test_client\/ca\.crt$/)}
@@ -162,7 +194,7 @@ describe 'openvpn::client', :type => :define do
       'server'    => 'test_server',
       'shared_ca' => 'my_already_existing_ca',
     } }
-    it { expect { should compile }.to raise_error }
+    it { expect { should contain_file('test') }.to raise_error(Puppet::Error) }
   end
 
   context 'custom options' do

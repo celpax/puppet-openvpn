@@ -31,7 +31,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-class openvpn::install inherits ::openvpn::params {
+class openvpn::install inherits openvpn::params {
 
   ensure_packages(['openvpn'])
   if $::openvpn::params::additional_packages != undef {
@@ -39,7 +39,7 @@ class openvpn::install inherits ::openvpn::params {
   }
 
   file {
-    [ '/etc/openvpn', '/etc/openvpn/keys', '/var/log/openvpn', ]:
+    [ "${::openvpn::params::etc_directory}/openvpn", "${::openvpn::params::etc_directory}/openvpn/keys", '/var/log/openvpn', ]:
       ensure  => directory,
       require => Package['openvpn'];
   }
